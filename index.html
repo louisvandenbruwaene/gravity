@@ -93,18 +93,18 @@ const FW=800,FH=500,DT=1/240,LIMIT=30,DENSITY=1600,ROCKET_R=4;
 const deg=a=>a*Math.PI/180;
 function ring(R,n,gapFrom,gapLen,r=11){const out=[];for(let i=0;i<n;i++){if(i>=gapFrom&&i<gapFrom+gapLen)continue;const a=2*Math.PI*i/n;out.push({type:'rock',polar:[R,a],r,mu:0});}return out;}
 const LEVELS=[
-  {name:'First orbit',inv:[34,16],launch:{ang:-90,v:150},soft:140,comet:[400,90],
-   star:{x:400,y:250,r:26,mu:1.2e6,K:1100,dir:1},
-   bodies:[{type:'start',polar:[260,Math.PI],r:20,mu:0},{type:'dest',polar:[260,deg(-20)],r:24,mu:30000}]},
-  {name:'Through the ring',inv:[30,16],launch:{ang:-90,v:150},soft:140,comet:[400,40],
-   star:{x:400,y:250,r:22,mu:1.0e6,K:1000,dir:-1},
-   bodies:[{type:'start',polar:[300,Math.PI*.95],r:20,mu:0},{type:'dest',polar:[85,0],r:18,mu:20000},...ring(165,28,4,4)]},
-  {"name":"Crossing traffic","inv":[36,24,14],"launch":{"ang":-33.444,"v":198.891},"soft":150,"comet":[503.134,226.742],"star":{"x":400,"y":2200,"r":0,"mu":0,"K":729.423,"dir":1},"bodies":[{"type":"start","xy":[75.166,414.066],"r":20,"mu":0},{"type":"dest","xy":[477.022,103.121],"r":22,"mu":25000},{"type":"lava","xy":[208.71,330.621],"r":34,"mu":1849600},{"type":"lava","xy":[428.282,206.899],"r":30,"mu":1440000},{"type":"lava","xy":[250.396,133.776],"r":24,"mu":921600}]},
-  {"name":"Hot neighbour","inv":[38,22,12],"launch":{"ang":-22.6,"v":213.686},"soft":150,"comet":[377.788,424.364],"star":{"x":400,"y":250,"r":24,"mu":1074662.207,"K":1198.475,"dir":1},"bodies":[{"type":"start","xy":[105.292,178.484],"r":20,"mu":0},{"type":"dest","polar":[225.815,-0.601],"r":22,"mu":25000},{"type":"lava","polar":[123.642,2.523],"r":40,"mu":2560000},{"type":"rock","polar":[172,0],"r":11,"mu":0},{"type":"rock","polar":[172,0.242],"r":11,"mu":0},{"type":"rock","polar":[172,0.483],"r":11,"mu":0},{"type":"rock","polar":[172,0.725],"r":11,"mu":0},{"type":"rock","polar":[172,0.967],"r":11,"mu":0},{"type":"rock","polar":[172,1.208],"r":11,"mu":0},{"type":"rock","polar":[172,1.45],"r":11,"mu":0},{"type":"rock","polar":[172,1.692],"r":11,"mu":0},{"type":"rock","polar":[172,1.933],"r":11,"mu":0},{"type":"rock","polar":[172,2.175],"r":11,"mu":0},{"type":"rock","polar":[172,2.417],"r":11,"mu":0},{"type":"rock","polar":[172,2.658],"r":11,"mu":0},{"type":"rock","polar":[172,2.9],"r":11,"mu":0},{"type":"rock","polar":[172,4.108],"r":11,"mu":0},{"type":"rock","polar":[172,4.35],"r":11,"mu":0},{"type":"rock","polar":[172,4.592],"r":11,"mu":0},{"type":"rock","polar":[172,4.833],"r":11,"mu":0},{"type":"rock","polar":[172,5.075],"r":11,"mu":0},{"type":"rock","polar":[172,5.317],"r":11,"mu":0},{"type":"rock","polar":[172,5.558],"r":11,"mu":0},{"type":"rock","polar":[172,5.8],"r":11,"mu":0},{"type":"rock","polar":[172,6.042],"r":11,"mu":0}]},
-  {"name":"Black hole","inv":[34,22,12],"launch":{"ang":-2.395,"v":195.43},"soft":170,"comet":[319.546,257.879],"star":{"x":400,"y":250,"r":16,"mu":4978183.125,"K":1630.946,"dir":1,"hole":true},"bodies":[{"type":"start","polar":[308.172,3.385],"r":20,"mu":0},{"type":"dest","polar":[175.717,0.362],"r":20,"mu":20000},{"type":"rock","polar":[110,0],"r":10,"mu":0},{"type":"rock","polar":[110,0.286],"r":10,"mu":0},{"type":"rock","polar":[110,0.571],"r":10,"mu":0},{"type":"rock","polar":[110,0.857],"r":10,"mu":0},{"type":"rock","polar":[110,1.142],"r":10,"mu":0},{"type":"rock","polar":[110,1.428],"r":10,"mu":0},{"type":"rock","polar":[110,1.714],"r":10,"mu":0},{"type":"rock","polar":[110,1.999],"r":10,"mu":0},{"type":"rock","polar":[110,2.285],"r":10,"mu":0},{"type":"rock","polar":[110,2.57],"r":10,"mu":0},{"type":"rock","polar":[110,2.856],"r":10,"mu":0},{"type":"rock","polar":[110,3.142],"r":10,"mu":0},{"type":"rock","polar":[110,3.427],"r":10,"mu":0},{"type":"rock","polar":[110,3.713],"r":10,"mu":0},{"type":"rock","polar":[110,3.998],"r":10,"mu":0},{"type":"rock","polar":[110,4.284],"r":10,"mu":0},{"type":"rock","polar":[110,4.57],"r":10,"mu":0},{"type":"rock","polar":[110,4.855],"r":10,"mu":0}]},
-  {"name":"Double ring","inv":[30,22,14],"launch":{"ang":83.975,"v":185.517},"soft":150,"comet":[342.823,279.481],"star":{"x":400,"y":250,"r":20,"mu":650747.203,"K":781.175,"dir":1},"bodies":[{"type":"start","polar":[310,-1.571],"r":20,"mu":0},{"type":"dest","polar":[73.771,4.978],"r":16,"mu":15000},{"type":"rock","polar":[120,0],"r":11,"mu":0},{"type":"rock","polar":[120,0.262],"r":11,"mu":0},{"type":"rock","polar":[120,0.524],"r":11,"mu":0},{"type":"rock","polar":[120,0.785],"r":11,"mu":0},{"type":"rock","polar":[120,1.047],"r":11,"mu":0},{"type":"rock","polar":[120,1.309],"r":11,"mu":0},{"type":"rock","polar":[120,2.88],"r":11,"mu":0},{"type":"rock","polar":[120,3.142],"r":11,"mu":0},{"type":"rock","polar":[120,3.403],"r":11,"mu":0},{"type":"rock","polar":[120,3.665],"r":11,"mu":0},{"type":"rock","polar":[120,3.927],"r":11,"mu":0},{"type":"rock","polar":[120,4.189],"r":11,"mu":0},{"type":"rock","polar":[120,4.451],"r":11,"mu":0},{"type":"rock","polar":[120,4.712],"r":11,"mu":0},{"type":"rock","polar":[120,4.974],"r":11,"mu":0},{"type":"rock","polar":[120,5.236],"r":11,"mu":0},{"type":"rock","polar":[120,5.498],"r":11,"mu":0},{"type":"rock","polar":[120,5.76],"r":11,"mu":0},{"type":"rock","polar":[120,6.021],"r":11,"mu":0},{"type":"rock","polar":[205,1.109],"r":11,"mu":0},{"type":"rock","polar":[205,1.294],"r":11,"mu":0},{"type":"rock","polar":[205,1.478],"r":11,"mu":0},{"type":"rock","polar":[205,1.663],"r":11,"mu":0},{"type":"rock","polar":[205,1.848],"r":11,"mu":0},{"type":"rock","polar":[205,2.033],"r":11,"mu":0},{"type":"rock","polar":[205,2.218],"r":11,"mu":0},{"type":"rock","polar":[205,2.402],"r":11,"mu":0},{"type":"rock","polar":[205,2.587],"r":11,"mu":0},{"type":"rock","polar":[205,2.772],"r":11,"mu":0},{"type":"rock","polar":[205,2.957],"r":11,"mu":0},{"type":"rock","polar":[205,3.142],"r":11,"mu":0},{"type":"rock","polar":[205,3.326],"r":11,"mu":0},{"type":"rock","polar":[205,3.511],"r":11,"mu":0},{"type":"rock","polar":[205,3.696],"r":11,"mu":0},{"type":"rock","polar":[205,3.881],"r":11,"mu":0},{"type":"rock","polar":[205,4.066],"r":11,"mu":0},{"type":"rock","polar":[205,4.25],"r":11,"mu":0},{"type":"rock","polar":[205,4.435],"r":11,"mu":0},{"type":"rock","polar":[205,4.62],"r":11,"mu":0},{"type":"rock","polar":[205,4.805],"r":11,"mu":0},{"type":"rock","polar":[205,4.99],"r":11,"mu":0},{"type":"rock","polar":[205,5.174],"r":11,"mu":0},{"type":"rock","polar":[205,5.359],"r":11,"mu":0},{"type":"rock","polar":[205,5.544],"r":11,"mu":0},{"type":"rock","polar":[205,5.729],"r":11,"mu":0},{"type":"rock","polar":[205,5.914],"r":11,"mu":0},{"type":"rock","polar":[205,6.098],"r":11,"mu":0}]},
-  {"name":"Small target","inv":[40,24,16,10],"launch":{"ang":-71.212,"v":171.883},"soft":150,"comet":[308.56,213.99],"star":{"x":400,"y":250,"r":26,"mu":1325454.513,"K":1313.996,"dir":1},"bodies":[{"type":"start","xy":[66.167,442.597],"r":20,"mu":0},{"type":"dest","polar":[215.059,-1.312],"r":12,"mu":9000},{"type":"lava","polar":[108.109,5.969],"r":30,"mu":1440000},{"type":"lava","polar":[275.878,2.848],"r":26,"mu":1081600}]},
-  {"name":"Moon landing","inv":[38,24,14],"launch":{"ang":-22.202,"v":177.922},"soft":150,"comet":[317.517,365.042],"star":{"x":400,"y":250,"r":24,"mu":1066204.682,"K":976.562,"dir":1},"bodies":[{"type":"start","xy":[63.497,331.271],"r":20,"mu":0},{"type":"rock","polar":[203.016,-0.115],"r":30,"mu":1491400.524,"id":"giant"},{"type":"dest","moonOf":"giant","R":78.954,"ph":5.285,"w":-0.956,"r":14,"mu":12000},{"type":"rock","polar":[134,0],"r":10,"mu":0},{"type":"rock","polar":[134,0.262],"r":10,"mu":0},{"type":"rock","polar":[134,0.524],"r":10,"mu":0},{"type":"rock","polar":[134,0.785],"r":10,"mu":0},{"type":"rock","polar":[134,1.047],"r":10,"mu":0},{"type":"rock","polar":[134,1.309],"r":10,"mu":0},{"type":"rock","polar":[134,1.571],"r":10,"mu":0},{"type":"rock","polar":[134,1.833],"r":10,"mu":0},{"type":"rock","polar":[134,2.094],"r":10,"mu":0},{"type":"rock","polar":[134,2.356],"r":10,"mu":0},{"type":"rock","polar":[134,2.618],"r":10,"mu":0},{"type":"rock","polar":[134,2.88],"r":10,"mu":0},{"type":"rock","polar":[134,3.142],"r":10,"mu":0},{"type":"rock","polar":[134,3.403],"r":10,"mu":0},{"type":"rock","polar":[134,3.665],"r":10,"mu":0},{"type":"rock","polar":[134,3.927],"r":10,"mu":0},{"type":"rock","polar":[134,4.189],"r":10,"mu":0},{"type":"rock","polar":[134,5.498],"r":10,"mu":0},{"type":"rock","polar":[134,5.76],"r":10,"mu":0},{"type":"rock","polar":[134,6.021],"r":10,"mu":0}]}
+  {name:'First orbit',inv:[34,16],preview:30,launch:{ang:-20,v:150},soft:160,comet:[400,90],
+   star:{x:400,y:250,r:26,mu:6e5,K:600,dir:1},
+   bodies:[{type:'start',polar:[260,Math.PI],r:20,mu:0},{type:'dest',polar:[260,deg(-20)],r:42,mu:70000}]},
+  {name:'Through the ring',inv:[30,16],preview:30,launch:{ang:-90,v:150},soft:140,comet:[400,40],
+   star:{x:400,y:250,r:22,mu:1.0e6,K:800,dir:-1},
+   bodies:[{type:'start',polar:[300,Math.PI*.95],r:20,mu:0},{type:'dest',polar:[85,0],r:22,mu:30000},...ring(165,28,4,4)]},
+  {"name":"Crossing traffic","preview":5,"inv":[36,24,14],"launch":{"ang":-33.444,"v":198.891},"soft":150,"comet":[503.134,226.742],"star":{"x":400,"y":2200,"r":0,"mu":0,"K":729.423,"dir":1},"bodies":[{"type":"start","xy":[75.166,414.066],"r":20,"mu":0},{"type":"dest","xy":[477.022,103.121],"r":22,"mu":25000},{"type":"lava","xy":[208.71,330.621],"r":34,"mu":1849600},{"type":"lava","xy":[428.282,206.899],"r":30,"mu":1440000},{"type":"lava","xy":[250.396,133.776],"r":24,"mu":921600}]},
+  {"name":"Hot neighbour","preview":4,"inv":[38,22,12],"launch":{"ang":-22.6,"v":213.686},"soft":150,"comet":[377.788,424.364],"star":{"x":400,"y":250,"r":24,"mu":1074662.207,"K":1198.475,"dir":1},"bodies":[{"type":"start","xy":[105.292,178.484],"r":20,"mu":0},{"type":"dest","polar":[225.815,-0.601],"r":22,"mu":25000},{"type":"lava","polar":[123.642,2.523],"r":40,"mu":2560000},{"type":"rock","polar":[172,0],"r":11,"mu":0},{"type":"rock","polar":[172,0.242],"r":11,"mu":0},{"type":"rock","polar":[172,0.483],"r":11,"mu":0},{"type":"rock","polar":[172,0.725],"r":11,"mu":0},{"type":"rock","polar":[172,0.967],"r":11,"mu":0},{"type":"rock","polar":[172,1.208],"r":11,"mu":0},{"type":"rock","polar":[172,1.45],"r":11,"mu":0},{"type":"rock","polar":[172,1.692],"r":11,"mu":0},{"type":"rock","polar":[172,1.933],"r":11,"mu":0},{"type":"rock","polar":[172,2.175],"r":11,"mu":0},{"type":"rock","polar":[172,2.417],"r":11,"mu":0},{"type":"rock","polar":[172,2.658],"r":11,"mu":0},{"type":"rock","polar":[172,2.9],"r":11,"mu":0},{"type":"rock","polar":[172,4.108],"r":11,"mu":0},{"type":"rock","polar":[172,4.35],"r":11,"mu":0},{"type":"rock","polar":[172,4.592],"r":11,"mu":0},{"type":"rock","polar":[172,4.833],"r":11,"mu":0},{"type":"rock","polar":[172,5.075],"r":11,"mu":0},{"type":"rock","polar":[172,5.317],"r":11,"mu":0},{"type":"rock","polar":[172,5.558],"r":11,"mu":0},{"type":"rock","polar":[172,5.8],"r":11,"mu":0},{"type":"rock","polar":[172,6.042],"r":11,"mu":0}]},
+  {"name":"Black hole","preview":3,"inv":[34,22,12],"launch":{"ang":-2.395,"v":195.43},"soft":170,"comet":[319.546,257.879],"star":{"x":400,"y":250,"r":16,"mu":4978183.125,"K":1630.946,"dir":1,"hole":true},"bodies":[{"type":"start","polar":[308.172,3.385],"r":20,"mu":0},{"type":"dest","polar":[175.717,0.362],"r":20,"mu":20000},{"type":"rock","polar":[110,0],"r":10,"mu":0},{"type":"rock","polar":[110,0.286],"r":10,"mu":0},{"type":"rock","polar":[110,0.571],"r":10,"mu":0},{"type":"rock","polar":[110,0.857],"r":10,"mu":0},{"type":"rock","polar":[110,1.142],"r":10,"mu":0},{"type":"rock","polar":[110,1.428],"r":10,"mu":0},{"type":"rock","polar":[110,1.714],"r":10,"mu":0},{"type":"rock","polar":[110,1.999],"r":10,"mu":0},{"type":"rock","polar":[110,2.285],"r":10,"mu":0},{"type":"rock","polar":[110,2.57],"r":10,"mu":0},{"type":"rock","polar":[110,2.856],"r":10,"mu":0},{"type":"rock","polar":[110,3.142],"r":10,"mu":0},{"type":"rock","polar":[110,3.427],"r":10,"mu":0},{"type":"rock","polar":[110,3.713],"r":10,"mu":0},{"type":"rock","polar":[110,3.998],"r":10,"mu":0},{"type":"rock","polar":[110,4.284],"r":10,"mu":0},{"type":"rock","polar":[110,4.57],"r":10,"mu":0},{"type":"rock","polar":[110,4.855],"r":10,"mu":0}]},
+  {"name":"Double ring","preview":3,"inv":[30,22,14],"launch":{"ang":83.975,"v":185.517},"soft":150,"comet":[342.823,279.481],"star":{"x":400,"y":250,"r":20,"mu":650747.203,"K":781.175,"dir":1},"bodies":[{"type":"start","polar":[310,-1.571],"r":20,"mu":0},{"type":"dest","polar":[73.771,4.978],"r":16,"mu":15000},{"type":"rock","polar":[120,0],"r":11,"mu":0},{"type":"rock","polar":[120,0.262],"r":11,"mu":0},{"type":"rock","polar":[120,0.524],"r":11,"mu":0},{"type":"rock","polar":[120,0.785],"r":11,"mu":0},{"type":"rock","polar":[120,1.047],"r":11,"mu":0},{"type":"rock","polar":[120,1.309],"r":11,"mu":0},{"type":"rock","polar":[120,2.88],"r":11,"mu":0},{"type":"rock","polar":[120,3.142],"r":11,"mu":0},{"type":"rock","polar":[120,3.403],"r":11,"mu":0},{"type":"rock","polar":[120,3.665],"r":11,"mu":0},{"type":"rock","polar":[120,3.927],"r":11,"mu":0},{"type":"rock","polar":[120,4.189],"r":11,"mu":0},{"type":"rock","polar":[120,4.451],"r":11,"mu":0},{"type":"rock","polar":[120,4.712],"r":11,"mu":0},{"type":"rock","polar":[120,4.974],"r":11,"mu":0},{"type":"rock","polar":[120,5.236],"r":11,"mu":0},{"type":"rock","polar":[120,5.498],"r":11,"mu":0},{"type":"rock","polar":[120,5.76],"r":11,"mu":0},{"type":"rock","polar":[120,6.021],"r":11,"mu":0},{"type":"rock","polar":[205,1.109],"r":11,"mu":0},{"type":"rock","polar":[205,1.294],"r":11,"mu":0},{"type":"rock","polar":[205,1.478],"r":11,"mu":0},{"type":"rock","polar":[205,1.663],"r":11,"mu":0},{"type":"rock","polar":[205,1.848],"r":11,"mu":0},{"type":"rock","polar":[205,2.033],"r":11,"mu":0},{"type":"rock","polar":[205,2.218],"r":11,"mu":0},{"type":"rock","polar":[205,2.402],"r":11,"mu":0},{"type":"rock","polar":[205,2.587],"r":11,"mu":0},{"type":"rock","polar":[205,2.772],"r":11,"mu":0},{"type":"rock","polar":[205,2.957],"r":11,"mu":0},{"type":"rock","polar":[205,3.142],"r":11,"mu":0},{"type":"rock","polar":[205,3.326],"r":11,"mu":0},{"type":"rock","polar":[205,3.511],"r":11,"mu":0},{"type":"rock","polar":[205,3.696],"r":11,"mu":0},{"type":"rock","polar":[205,3.881],"r":11,"mu":0},{"type":"rock","polar":[205,4.066],"r":11,"mu":0},{"type":"rock","polar":[205,4.25],"r":11,"mu":0},{"type":"rock","polar":[205,4.435],"r":11,"mu":0},{"type":"rock","polar":[205,4.62],"r":11,"mu":0},{"type":"rock","polar":[205,4.805],"r":11,"mu":0},{"type":"rock","polar":[205,4.99],"r":11,"mu":0},{"type":"rock","polar":[205,5.174],"r":11,"mu":0},{"type":"rock","polar":[205,5.359],"r":11,"mu":0},{"type":"rock","polar":[205,5.544],"r":11,"mu":0},{"type":"rock","polar":[205,5.729],"r":11,"mu":0},{"type":"rock","polar":[205,5.914],"r":11,"mu":0},{"type":"rock","polar":[205,6.098],"r":11,"mu":0}]},
+  {"name":"Small target","preview":2,"inv":[40,24,16,10],"launch":{"ang":-71.212,"v":171.883},"soft":150,"comet":[308.56,213.99],"star":{"x":400,"y":250,"r":26,"mu":1325454.513,"K":1313.996,"dir":1},"bodies":[{"type":"start","xy":[66.167,442.597],"r":20,"mu":0},{"type":"dest","polar":[215.059,-1.312],"r":12,"mu":9000},{"type":"lava","polar":[108.109,5.969],"r":30,"mu":1440000},{"type":"lava","polar":[275.878,2.848],"r":26,"mu":1081600}]},
+  {"name":"Moon landing","preview":2,"inv":[38,24,14],"launch":{"ang":-22.202,"v":177.922},"soft":150,"comet":[317.517,365.042],"star":{"x":400,"y":250,"r":24,"mu":1066204.682,"K":976.562,"dir":1},"bodies":[{"type":"start","xy":[63.497,331.271],"r":20,"mu":0},{"type":"rock","polar":[203.016,-0.115],"r":30,"mu":1491400.524,"id":"giant"},{"type":"dest","moonOf":"giant","R":78.954,"ph":5.285,"w":-0.956,"r":14,"mu":12000},{"type":"rock","polar":[134,0],"r":10,"mu":0},{"type":"rock","polar":[134,0.262],"r":10,"mu":0},{"type":"rock","polar":[134,0.524],"r":10,"mu":0},{"type":"rock","polar":[134,0.785],"r":10,"mu":0},{"type":"rock","polar":[134,1.047],"r":10,"mu":0},{"type":"rock","polar":[134,1.309],"r":10,"mu":0},{"type":"rock","polar":[134,1.571],"r":10,"mu":0},{"type":"rock","polar":[134,1.833],"r":10,"mu":0},{"type":"rock","polar":[134,2.094],"r":10,"mu":0},{"type":"rock","polar":[134,2.356],"r":10,"mu":0},{"type":"rock","polar":[134,2.618],"r":10,"mu":0},{"type":"rock","polar":[134,2.88],"r":10,"mu":0},{"type":"rock","polar":[134,3.142],"r":10,"mu":0},{"type":"rock","polar":[134,3.403],"r":10,"mu":0},{"type":"rock","polar":[134,3.665],"r":10,"mu":0},{"type":"rock","polar":[134,3.927],"r":10,"mu":0},{"type":"rock","polar":[134,4.189],"r":10,"mu":0},{"type":"rock","polar":[134,5.498],"r":10,"mu":0},{"type":"rock","polar":[134,5.76],"r":10,"mu":0},{"type":"rock","polar":[134,6.021],"r":10,"mu":0}]}
 ];
 function makeWorld(L,placed){
   const S=L.star,bodies=[];
@@ -127,6 +127,12 @@ function vel(b,t){const a=b.ph+b.w*t;let vx=-b.R*b.w*Math.sin(a),vy=b.R*b.w*Math
 function place(w,t){for(const b of w.bodies)[b.px,b.py]=pos(b,t);}
 /* drop a planet where it is right now; it joins the star's orbit from that point */
 function addPlanet(w,x,y,r,t=w.t){const b={type:'placed',r,mu:DENSITY*r*r};w.orbitAbout(b,x,y);b.ph-=b.w*t;w.bodies.push(b);[b.px,b.py]=pos(b,t);return b;}
+function movePlanet(w,b,x,y){w.orbitAbout(b,x,y);b.ph-=b.w*w.t;[b.px,b.py]=pos(b,w.t);}
+function cloneWorld(w){const map=new Map(),bodies=w.bodies.map(b=>{const c=Object.assign({},b);map.set(b,c);return c;});for(const c of bodies)if(c.parent)c.parent=map.get(c.parent);
+  return Object.assign({},w,{bodies,rocket:Object.assign({},w.rocket)});}
+function predict(w,secs){const c=cloneWorld(w);if(c.state==='pad'){c.state='fly';c.ft=0;}const pts=[[c.rocket.x,c.rocket.y]];let n=0;
+  while(c.state==='fly'&&c.ft<secs&&n++<20000){step(c,DT*2);const l=pts[pts.length-1];if(Math.hypot(l[0]-c.rocket.x,l[1]-c.rocket.y)>5)pts.push([c.rocket.x,c.rocket.y]);}
+  pts.push([c.rocket.x,c.rocket.y]);return {pts,result:c.state==='done'?c.result:null};}
 function accel(w,x,y){let ax=0,ay=0;for(const b of w.bodies){if(!b.mu)continue;const dx=b.px-x,dy=b.py-y,d2=dx*dx+dy*dy+25,d=Math.sqrt(d2);ax+=b.mu*dx/(d2*d);ay+=b.mu*dy/(d2*d);}return [ax,ay];}
 function step(w,dt){
   if(w.state!=='fly')return;
@@ -144,7 +150,7 @@ function step(w,dt){
   if(R.x<-80||R.x>FW+80||R.y<-80||R.y>FH+80||w.ft>LIMIT){w.state='done';w.result='lost';}
 }
 function launch(w){if(w.state==='pad'){w.state='fly';w.ft=0;}}
-if(typeof module!=='undefined')module.exports={LEVELS,makeWorld,step,addPlanet,launch,DT,FW,FH};
+if(typeof module!=='undefined')module.exports={LEVELS,makeWorld,step,addPlanet,launch,movePlanet,predict,DT,FW,FH};
 </script>
 
 <script>
@@ -154,7 +160,7 @@ const cv=$('#space'),g=cv.getContext('2d'),DPR=Math.min(2,window.devicePixelRati
 cv.width=FW*DPR;cv.height=FH*DPR;
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const PLACED_COL=['#b18cff','#5fd4c4','#ff9fd0','#9fd0ff'];
-let li=0,world,placed=[],used=[],sel=0,acc=0,trail=[],done=false,shown=null;
+let li=0,world,placed=[],used=[],sel=0,acc=0,trail=[],done=false,shown=null,drag=null,touched=null,preview=null,dirty=true;
 let save={stars:{}};try{save=Object.assign(save,JSON.parse(localStorage.getItem('gravity-save')||'{}'));}catch(e){}
 function persist(){try{localStorage.setItem('gravity-save',JSON.stringify(save));}catch(e){}}
 const sky=(()=>{let s=4;const r=()=>{s=(s*16807)%2147483647;return s/2147483647;};return Array.from({length:140},()=>[r()*FW,r()*FH,r()*1.4+.3,r()*6.28]);})();
@@ -172,26 +178,38 @@ function buildInv(){
 }
 function nextFree(){const i=used.findIndex((u,k)=>!u&&k>=0);return i;}
 function load(i){li=i;placed=[];used=LEVELS[i].inv.map(()=>false);sel=0;$('#lvname').textContent=LEVELS[i].name;reset();buildLevels();buildInv();}
-function reset(){world=makeWorld(LEVELS[li],[]);for(const p of placed)p.body=addPlanet(world,p.x,p.y,p.r,0),p.body.slot=p.slot;trail=[];done=false;acc=0;$('#ov').hidden=true;$('#bLaunch').textContent='Launch';}
+function reset(){world=makeWorld(LEVELS[li],[]);for(const p of placed)p.body=addPlanet(world,p.x,p.y,p.r,0),p.body.slot=p.slot;trail=[];done=false;acc=0;dirty=true;drag=null;$('#ov').hidden=true;$('#bLaunch').textContent='Launch';}
 function clearAll(){placed=[];used=used.map(()=>false);sel=0;reset();buildInv();}
 function go(){if(world.state==='pad'){launch(world);$('#bLaunch').textContent='Reset';}else reset();}
 
 /* placing: tap empty space drops the selected planet into orbit; tap one of yours to take it back */
 function pt(e){const r=cv.getBoundingClientRect();return [(e.clientX-r.left)/r.width*FW,(e.clientY-r.top)/r.height*FH];}
+const fits=(x,y,r,skip)=>!world.bodies.some(b=>b!==skip&&Math.hypot(b.px-x,b.py-y)<b.r+r+4)&&Math.hypot(world.rocket.x-x,world.rocket.y-y)>=r+8&&x>0&&x<FW&&y>0&&y<FH;
+function takeBack(b){world.bodies.splice(world.bodies.indexOf(b),1);used[b.slot]=false;placed=placed.filter(p=>p.body!==b);sel=b.slot;if(touched===b)touched=null;dirty=true;buildInv();}
+function moveTo(b,x,y){if(!fits(x,y,b.r,b))return false;movePlanet(world,b,x,y);const p=placed.find(p=>p.body===b);p.x=x;p.y=y;dirty=true;return true;}
 cv.addEventListener('pointerdown',e=>{
   if(done)return;
   const [x,y]=pt(e);
-  const mine=world.bodies.find(b=>b.type==='placed'&&Math.hypot(b.px-x,b.py-y)<b.r+6);
-  if(mine){world.bodies.splice(world.bodies.indexOf(mine),1);used[mine.slot]=false;placed=placed.filter(p=>p.body!==mine);sel=mine.slot;buildInv();return;}
+  const mine=world.bodies.find(b=>b.type==='placed'&&Math.hypot(b.px-x,b.py-y)<b.r+8);
+  if(mine){
+    if(world.state==='pad'){drag={b:mine,x0:x,y0:y,dx:mine.px-x,dy:mine.py-y,moved:false};touched=mine;cv.setPointerCapture(e.pointerId);}
+    else takeBack(mine);
+    return;
+  }
   if(used[sel]){const f=nextFree();if(f<0)return;sel=f;}
   const r=LEVELS[li].inv[sel];
-  if(world.bodies.some(b=>Math.hypot(b.px-x,b.py-y)<b.r+r+4)||Math.hypot(world.rocket.x-x,world.rocket.y-y)<r+8){flash(x,y);return;}
-  const b=addPlanet(world,x,y,r);b.slot=sel;used[sel]=true;
-  if(world.state==='pad')placed.push({x,y,r,slot:sel,body:b});else placed.push({x:b.px,y:b.py,r,slot:sel,body:b,late:true});
-  const f=nextFree();if(f>=0)sel=f;buildInv();
+  if(!fits(x,y,r)){flash(x,y);return;}
+  const b=addPlanet(world,x,y,r);b.slot=sel;used[sel]=true;touched=b;
+  if(world.state==='pad')placed.push({x,y,r,slot:sel,body:b});else{placed.push({x:b.px,y:b.py,r,slot:sel,body:b,late:true});preview=null;}
+  dirty=true;const f=nextFree();if(f>=0)sel=f;buildInv();
 });
+cv.addEventListener('pointermove',e=>{if(!drag)return;const [x,y]=pt(e);if(!drag.moved&&Math.hypot(x-drag.x0,y-drag.y0)<4)return;drag.moved=true;moveTo(drag.b,x+drag.dx,y+drag.dy);});
+const endDrag=()=>{if(!drag)return;if(!drag.moved)takeBack(drag.b);drag=null;};
+cv.addEventListener('pointerup',endDrag);cv.addEventListener('pointercancel',endDrag);
 let bad=null;function flash(x,y){bad={x,y,t:performance.now()/1000};}
-addEventListener('keydown',e=>{if(e.repeat||e.metaKey||e.ctrlKey)return;const k=e.key.toLowerCase();
+addEventListener('keydown',e=>{if(e.metaKey||e.ctrlKey)return;if(e.repeat&&!e.key.startsWith('Arrow'))return;const k=e.key.toLowerCase();
+  const NUDGE={arrowleft:[-1,0],arrowright:[1,0],arrowup:[0,-1],arrowdown:[0,1]};
+  if(NUDGE[k]&&touched&&world.state==='pad'){e.preventDefault();const m=e.shiftKey?5:1;moveTo(touched,touched.px+NUDGE[k][0]*m,touched.py+NUDGE[k][1]*m);return;}
   if(k===' '){e.preventDefault();if(!$('#ov').hidden)reset();else go();}
   else if(k==='r')reset();else if(k==='c')clearAll();
   else if(k>='1'&&k<='4'&&+k<=LEVELS[li].inv.length&&!used[+k-1]){sel=+k-1;buildInv();}});
@@ -258,13 +276,18 @@ function render(now){
   warpGrid();
   for(const b of w.bodies)orbitPath(b);
   const c=w.L.comet;if(!w.comet){const k=reduce?0:Math.sin(t*3)*.15;g.save();g.translate(...c);g.rotate(-.5);g.fillStyle='rgba(150,230,255,.25)';g.beginPath();g.ellipse(-14,0,16,4,0,0,7);g.fill();g.restore();ball(c[0],c[1],6*(1+k),'#ffffff','#7fd8ff','rgba(127,216,255,.5)');}
+  if(preview&&preview.pts.length>1){const pts=preview.pts,live=w.state==='pad';g.lineWidth=2;
+    for(let i=1;i<pts.length;i+=2){const a=live?.85*(1-.55*i/pts.length):.25;g.strokeStyle=`rgba(255,255,255,${a})`;g.beginPath();g.moveTo(...pts[i-1]);g.lineTo(...pts[i]);g.stroke();}
+    if(live&&preview.result){const e=pts[pts.length-1],ok=preview.result==='soft'||preview.result==='hard';g.strokeStyle=ok?'#8fe3a0':'#ff7d6e';g.lineWidth=2.5;g.beginPath();
+      if(ok)g.arc(e[0],e[1],9,0,7);else{g.moveTo(e[0]-7,e[1]-7);g.lineTo(e[0]+7,e[1]+7);g.moveTo(e[0]+7,e[1]-7);g.lineTo(e[0]-7,e[1]+7);}g.stroke();}}
   for(const b of w.bodies)drawBody(b,t);
+  if(touched&&w.state==='pad'&&w.bodies.includes(touched)){g.strokeStyle='rgba(242,201,76,.8)';g.setLineDash([3,4]);g.lineWidth=1.5;g.beginPath();g.arc(touched.px,touched.py,touched.r+6,0,7);g.stroke();g.setLineDash([]);}
   if(trail.length>1){for(let i=1;i<trail.length;i++){g.strokeStyle=`rgba(255,200,140,${i/trail.length*.7})`;g.lineWidth=2;g.beginPath();g.moveTo(...trail[i-1]);g.lineTo(...trail[i]);g.stroke();}}
   if(w.state==='pad'){const a=w.L.launch.ang*Math.PI/180,R=w.rocket;g.strokeStyle='rgba(255,255,255,.6)';g.setLineDash([5,5]);g.lineWidth=1.5;g.beginPath();g.moveTo(R.x,R.y);g.lineTo(R.x+Math.cos(a)*50,R.y+Math.sin(a)*50);g.stroke();g.setLineDash([]);}
   if(w.result!=='crash'&&w.result!=='lost'||!done)drawRocket(w.rocket,t,w.state==='fly');
   else{const R=w.rocket,k=Math.min(1,(t-(shown||t))*2);g.fillStyle=`rgba(255,160,80,${1-k})`;g.beginPath();g.arc(R.x,R.y,6+18*k,0,7);g.fill();}
   if(bad&&t-bad.t<.4){g.strokeStyle=`rgba(255,110,110,${1-(t-bad.t)/.4})`;g.lineWidth=2;g.beginPath();g.arc(bad.x,bad.y,14,0,7);g.moveTo(bad.x-8,bad.y-8);g.lineTo(bad.x+8,bad.y+8);g.stroke();}
-  if(w.state==='pad'&&placed.length===0)label('Tap space to drop a planet. It joins the orbit from there.',FW/2,26,17);
+  if(w.state==='pad'&&placed.length===0)label('Tap to drop a planet. Drag it to fine-tune, then Launch.',FW/2,26,17);
   if(w.state==='fly')label(`${w.ft.toFixed(1)} s`,FW-40,22,15,'#9aa3c7');
 }
 let last=performance.now();
@@ -272,6 +295,7 @@ function frame(now){
   const dt=Math.min(.05,(now-last)/1000);last=now;
   if(world.state==='fly'){acc+=dt;while(acc>=DT&&world.state==='fly'){step(world,DT);acc-=DT;}
     const R=world.rocket,lt=trail[trail.length-1];if(!lt||Math.hypot(lt[0]-R.x,lt[1]-R.y)>4){trail.push([R.x,R.y]);if(trail.length>160)trail.shift();}}
+  if(world.state==='pad'&&dirty){preview=predict(world,LEVELS[li].preview);dirty=false;}
   if(world.state==='done'&&!done){shown=now/1000;finish();}
   render(now);requestAnimationFrame(frame);
 }
