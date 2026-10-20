@@ -26,6 +26,8 @@ body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:1
 .title{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;min-width:0}
 h1{font-family:var(--f-display);font-weight:700;font-size:30px;margin:0;letter-spacing:-.01em}
 #lvname{font-family:var(--f-display);font-weight:500;font-size:18px;color:var(--muted)}
+#total{font-family:var(--f-display);font-weight:600;font-size:15px;color:var(--accent)}
+button.on{box-shadow:0 0 0 3px var(--accent) inset,0 3px 0 #06060f}
 .levels{display:flex;gap:6px;flex-wrap:wrap}
 button{font-family:var(--f-display);font-size:16px;font-weight:600;border:0;border-radius:10px;padding:9px 14px;background:var(--panel2);color:var(--ink);cursor:pointer;box-shadow:0 3px 0 #06060f;transition:transform .06s}
 button:hover:not(:disabled){filter:brightness(1.15)}
@@ -62,7 +64,7 @@ canvas{display:block;width:100%;aspect-ratio:8/5;max-width:100%;touch-action:non
 <body>
 <div class="wrap">
   <div class="top">
-    <div class="title"><h1>Gravity</h1><span id="lvname"></span></div>
+    <div class="title"><h1>Gravity</h1><span id="lvname"></span><span id="total"></span></div>
     <div class="levels" id="levels"></div>
   </div>
   <div class="stage">
@@ -78,7 +80,7 @@ canvas{display:block;width:100%;aspect-ratio:8/5;max-width:100%;touch-action:non
   </div>
   <div class="bar">
     <div class="group"><span class="tray-label">Planets</span><span class="group" id="inv"></span></div>
-    <div class="group"><button id="bClear">Clear</button><button class="primary" id="bLaunch">Launch</button></div>
+    <div class="group"><button id="bMute" title="Sound (M)">Sound</button><button id="bFast" title="Fast-forward (F)">&#9193;</button><button id="bClear">Clear</button><button class="primary" id="bLaunch">Launch</button></div>
   </div>
 </div>
 
@@ -102,7 +104,10 @@ const LEVELS=[
   {"name":"Black hole","preview":8,"inv":[34,22,12],"launch":{"ang":-2.395,"v":195.43},"soft":170,"comet":[319.546,257.879],"star":{"x":400,"y":250,"r":16,"mu":4978183.125,"K":1630.946,"dir":1,"hole":true},"bodies":[{"type":"start","polar":[308.172,3.385],"r":20,"mu":0},{"type":"dest","polar":[175.717,0.362],"r":20,"mu":20000},{"type":"rock","polar":[110,0],"r":10,"mu":0},{"type":"rock","polar":[110,0.286],"r":10,"mu":0},{"type":"rock","polar":[110,0.571],"r":10,"mu":0},{"type":"rock","polar":[110,0.857],"r":10,"mu":0},{"type":"rock","polar":[110,1.142],"r":10,"mu":0},{"type":"rock","polar":[110,1.428],"r":10,"mu":0},{"type":"rock","polar":[110,1.714],"r":10,"mu":0},{"type":"rock","polar":[110,1.999],"r":10,"mu":0},{"type":"rock","polar":[110,2.285],"r":10,"mu":0},{"type":"rock","polar":[110,2.57],"r":10,"mu":0},{"type":"rock","polar":[110,2.856],"r":10,"mu":0},{"type":"rock","polar":[110,3.142],"r":10,"mu":0},{"type":"rock","polar":[110,3.427],"r":10,"mu":0},{"type":"rock","polar":[110,3.713],"r":10,"mu":0},{"type":"rock","polar":[110,3.998],"r":10,"mu":0},{"type":"rock","polar":[110,4.284],"r":10,"mu":0},{"type":"rock","polar":[110,4.57],"r":10,"mu":0},{"type":"rock","polar":[110,4.855],"r":10,"mu":0}]},
   {"name":"Double ring","preview":6,"inv":[30,22,14],"launch":{"ang":83.975,"v":185.517},"soft":150,"comet":[342.823,279.481],"star":{"x":400,"y":250,"r":20,"mu":650747.203,"K":781.175,"dir":1},"bodies":[{"type":"start","polar":[310,-1.571],"r":20,"mu":0},{"type":"dest","polar":[73.771,4.978],"r":16,"mu":15000},{"type":"rock","polar":[120,0],"r":11,"mu":0},{"type":"rock","polar":[120,0.262],"r":11,"mu":0},{"type":"rock","polar":[120,0.524],"r":11,"mu":0},{"type":"rock","polar":[120,0.785],"r":11,"mu":0},{"type":"rock","polar":[120,1.047],"r":11,"mu":0},{"type":"rock","polar":[120,1.309],"r":11,"mu":0},{"type":"rock","polar":[120,2.88],"r":11,"mu":0},{"type":"rock","polar":[120,3.142],"r":11,"mu":0},{"type":"rock","polar":[120,3.403],"r":11,"mu":0},{"type":"rock","polar":[120,3.665],"r":11,"mu":0},{"type":"rock","polar":[120,3.927],"r":11,"mu":0},{"type":"rock","polar":[120,4.189],"r":11,"mu":0},{"type":"rock","polar":[120,4.451],"r":11,"mu":0},{"type":"rock","polar":[120,4.712],"r":11,"mu":0},{"type":"rock","polar":[120,4.974],"r":11,"mu":0},{"type":"rock","polar":[120,5.236],"r":11,"mu":0},{"type":"rock","polar":[120,5.498],"r":11,"mu":0},{"type":"rock","polar":[120,5.76],"r":11,"mu":0},{"type":"rock","polar":[120,6.021],"r":11,"mu":0},{"type":"rock","polar":[205,1.109],"r":11,"mu":0},{"type":"rock","polar":[205,1.294],"r":11,"mu":0},{"type":"rock","polar":[205,1.478],"r":11,"mu":0},{"type":"rock","polar":[205,1.663],"r":11,"mu":0},{"type":"rock","polar":[205,1.848],"r":11,"mu":0},{"type":"rock","polar":[205,2.033],"r":11,"mu":0},{"type":"rock","polar":[205,2.218],"r":11,"mu":0},{"type":"rock","polar":[205,2.402],"r":11,"mu":0},{"type":"rock","polar":[205,2.587],"r":11,"mu":0},{"type":"rock","polar":[205,2.772],"r":11,"mu":0},{"type":"rock","polar":[205,2.957],"r":11,"mu":0},{"type":"rock","polar":[205,3.142],"r":11,"mu":0},{"type":"rock","polar":[205,3.326],"r":11,"mu":0},{"type":"rock","polar":[205,3.511],"r":11,"mu":0},{"type":"rock","polar":[205,3.696],"r":11,"mu":0},{"type":"rock","polar":[205,3.881],"r":11,"mu":0},{"type":"rock","polar":[205,4.066],"r":11,"mu":0},{"type":"rock","polar":[205,4.25],"r":11,"mu":0},{"type":"rock","polar":[205,4.435],"r":11,"mu":0},{"type":"rock","polar":[205,4.62],"r":11,"mu":0},{"type":"rock","polar":[205,4.805],"r":11,"mu":0},{"type":"rock","polar":[205,4.99],"r":11,"mu":0},{"type":"rock","polar":[205,5.174],"r":11,"mu":0},{"type":"rock","polar":[205,5.359],"r":11,"mu":0},{"type":"rock","polar":[205,5.544],"r":11,"mu":0},{"type":"rock","polar":[205,5.729],"r":11,"mu":0},{"type":"rock","polar":[205,5.914],"r":11,"mu":0},{"type":"rock","polar":[205,6.098],"r":11,"mu":0}]},
   {"name":"Small target","preview":5,"inv":[40,24,16,10],"launch":{"ang":-71.212,"v":171.883},"soft":150,"comet":[308.56,213.99],"star":{"x":400,"y":250,"r":26,"mu":1325454.513,"K":1313.996,"dir":1},"bodies":[{"type":"start","xy":[66.167,442.597],"r":20,"mu":0},{"type":"dest","polar":[215.059,-1.312],"r":16,"mu":16000},{"type":"lava","polar":[108.109,5.969],"r":30,"mu":1440000},{"type":"lava","polar":[275.878,2.848],"r":26,"mu":1081600}]},
-  {"name":"Moon landing","preview":5,"inv":[38,24,14],"launch":{"ang":-22.202,"v":177.922},"soft":150,"comet":[317.517,365.042],"star":{"x":400,"y":250,"r":24,"mu":1066204.682,"K":976.562,"dir":1},"bodies":[{"type":"start","xy":[63.497,331.271],"r":20,"mu":0},{"type":"rock","polar":[203.016,-0.115],"r":30,"mu":1491400.524,"id":"giant"},{"type":"dest","moonOf":"giant","R":78.954,"ph":5.285,"w":-0.956,"r":14,"mu":12000},{"type":"rock","polar":[134,0],"r":10,"mu":0},{"type":"rock","polar":[134,0.262],"r":10,"mu":0},{"type":"rock","polar":[134,0.524],"r":10,"mu":0},{"type":"rock","polar":[134,0.785],"r":10,"mu":0},{"type":"rock","polar":[134,1.047],"r":10,"mu":0},{"type":"rock","polar":[134,1.309],"r":10,"mu":0},{"type":"rock","polar":[134,1.571],"r":10,"mu":0},{"type":"rock","polar":[134,1.833],"r":10,"mu":0},{"type":"rock","polar":[134,2.094],"r":10,"mu":0},{"type":"rock","polar":[134,2.356],"r":10,"mu":0},{"type":"rock","polar":[134,2.618],"r":10,"mu":0},{"type":"rock","polar":[134,2.88],"r":10,"mu":0},{"type":"rock","polar":[134,3.142],"r":10,"mu":0},{"type":"rock","polar":[134,3.403],"r":10,"mu":0},{"type":"rock","polar":[134,3.665],"r":10,"mu":0},{"type":"rock","polar":[134,3.927],"r":10,"mu":0},{"type":"rock","polar":[134,4.189],"r":10,"mu":0},{"type":"rock","polar":[134,5.498],"r":10,"mu":0},{"type":"rock","polar":[134,5.76],"r":10,"mu":0},{"type":"rock","polar":[134,6.021],"r":10,"mu":0}]}
+  {"name":"Moon landing","preview":5,"inv":[38,24,14],"launch":{"ang":-22.202,"v":177.922},"soft":150,"comet":[317.517,365.042],"star":{"x":400,"y":250,"r":24,"mu":1066204.682,"K":976.562,"dir":1},"bodies":[{"type":"start","xy":[63.497,331.271],"r":20,"mu":0},{"type":"rock","polar":[203.016,-0.115],"r":30,"mu":1491400.524,"id":"giant"},{"type":"dest","moonOf":"giant","R":78.954,"ph":5.285,"w":-0.956,"r":14,"mu":12000},{"type":"rock","polar":[134,0],"r":10,"mu":0},{"type":"rock","polar":[134,0.262],"r":10,"mu":0},{"type":"rock","polar":[134,0.524],"r":10,"mu":0},{"type":"rock","polar":[134,0.785],"r":10,"mu":0},{"type":"rock","polar":[134,1.047],"r":10,"mu":0},{"type":"rock","polar":[134,1.309],"r":10,"mu":0},{"type":"rock","polar":[134,1.571],"r":10,"mu":0},{"type":"rock","polar":[134,1.833],"r":10,"mu":0},{"type":"rock","polar":[134,2.094],"r":10,"mu":0},{"type":"rock","polar":[134,2.356],"r":10,"mu":0},{"type":"rock","polar":[134,2.618],"r":10,"mu":0},{"type":"rock","polar":[134,2.88],"r":10,"mu":0},{"type":"rock","polar":[134,3.142],"r":10,"mu":0},{"type":"rock","polar":[134,3.403],"r":10,"mu":0},{"type":"rock","polar":[134,3.665],"r":10,"mu":0},{"type":"rock","polar":[134,3.927],"r":10,"mu":0},{"type":"rock","polar":[134,4.189],"r":10,"mu":0},{"type":"rock","polar":[134,5.498],"r":10,"mu":0},{"type":"rock","polar":[134,5.76],"r":10,"mu":0},{"type":"rock","polar":[134,6.021],"r":10,"mu":0}]},
+  {"name":"Slingshot","preview":4,"inv":[32,18],"launch":{"ang":19.896,"v":155.773},"soft":150,"comet":[457.831,289.127],"star":{"x":400,"y":250,"r":24,"mu":1074749.565,"K":1115.933,"dir":1},"bodies":[{"type":"start","xy":[78.633,279.756],"r":20,"mu":0},{"type":"dest","polar":[323.741,0.066],"r":18,"mu":18000},{"type":"lava","polar":[157.416,2.062],"r":32,"mu":1638400},{"type":"lava","polar":[155.088,2.528],"r":24,"mu":921600}]},
+  {"name":"Against the flow","preview":5,"inv":[36,24,14],"launch":{"ang":-15.902,"v":206.379},"soft":150,"comet":[549.419,224.638],"star":{"x":400,"y":250,"r":22,"mu":1124495.931,"K":1003.111,"dir":-1},"bodies":[{"type":"start","polar":[289.023,2.648],"r":20,"mu":0},{"type":"dest","polar":[152.6,0.654],"r":18,"mu":18000},{"type":"lava","polar":[224.356,2.403],"r":28,"mu":1254400},{"type":"rock","polar":[110,0],"r":10,"mu":0},{"type":"rock","polar":[110,0.314],"r":10,"mu":0},{"type":"rock","polar":[110,0.628],"r":10,"mu":0},{"type":"rock","polar":[110,0.942],"r":10,"mu":0},{"type":"rock","polar":[110,1.257],"r":10,"mu":0},{"type":"rock","polar":[110,1.571],"r":10,"mu":0},{"type":"rock","polar":[110,1.885],"r":10,"mu":0},{"type":"rock","polar":[110,2.199],"r":10,"mu":0},{"type":"rock","polar":[110,3.77],"r":10,"mu":0},{"type":"rock","polar":[110,4.084],"r":10,"mu":0},{"type":"rock","polar":[110,4.398],"r":10,"mu":0},{"type":"rock","polar":[110,4.712],"r":10,"mu":0},{"type":"rock","polar":[110,5.027],"r":10,"mu":0},{"type":"rock","polar":[110,5.341],"r":10,"mu":0},{"type":"rock","polar":[110,5.655],"r":10,"mu":0},{"type":"rock","polar":[110,5.969],"r":10,"mu":0}]},
+  {"name":"Grand tour","preview":4,"inv":[38,26,16,10],"launch":{"ang":-9.151,"v":202.002},"soft":150,"comet":[401.22,365.672],"star":{"x":400,"y":250,"r":16,"mu":3902070.976,"K":1521.38,"dir":1,"hole":true},"bodies":[{"type":"start","xy":[82.821,337.717],"r":20,"mu":0},{"type":"rock","polar":[243.106,0.459],"r":30,"mu":1491400,"id":"giant"},{"type":"dest","moonOf":"giant","R":76.921,"ph":3.917,"w":-0.942,"r":14,"mu":12000},{"type":"lava","polar":[147.7,5.616],"r":26,"mu":1081600},{"type":"rock","polar":[95,0],"r":10,"mu":0},{"type":"rock","polar":[95,0.349],"r":10,"mu":0},{"type":"rock","polar":[95,2.094],"r":10,"mu":0},{"type":"rock","polar":[95,2.443],"r":10,"mu":0},{"type":"rock","polar":[95,2.793],"r":10,"mu":0},{"type":"rock","polar":[95,3.142],"r":10,"mu":0},{"type":"rock","polar":[95,3.491],"r":10,"mu":0},{"type":"rock","polar":[95,3.84],"r":10,"mu":0},{"type":"rock","polar":[95,4.189],"r":10,"mu":0},{"type":"rock","polar":[95,4.538],"r":10,"mu":0},{"type":"rock","polar":[95,4.887],"r":10,"mu":0},{"type":"rock","polar":[95,5.236],"r":10,"mu":0},{"type":"rock","polar":[95,5.585],"r":10,"mu":0},{"type":"rock","polar":[95,5.934],"r":10,"mu":0}]}
 ];
 function makeWorld(L,placed){
   const S=L.star,bodies=[];
@@ -158,15 +163,42 @@ const cv=$('#space'),g=cv.getContext('2d'),DPR=Math.min(2,window.devicePixelRati
 cv.width=FW*DPR;cv.height=FH*DPR;
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const PLACED_COL=['#b18cff','#5fd4c4','#ff9fd0','#9fd0ff'];
-let li=0,world,placed=[],used=[],sel=0,acc=0,trail=[],done=false,shown=null,drag=null,touched=null,preview=null,dirty=true;
-let save={stars:{}};try{save=Object.assign(save,JSON.parse(localStorage.getItem('gravity-save')||'{}'));}catch(e){}
+let li=0,world,placed=[],used=[],sel=0,acc=0,trail=[],done=false,shown=null,drag=null,touched=null,preview=null,dirty=true,fast=false,sparks=[],shake=0,hadComet=false;
+let save={stars:{},mute:false};try{save=Object.assign(save,JSON.parse(localStorage.getItem('gravity-save')||'{}'));}catch(e){}
 function persist(){try{localStorage.setItem('gravity-save',JSON.stringify(save));}catch(e){}}
+/* sound: tiny synth, no audio files */
+let ac=null;
+function tone(f,dur,{type='sine',vol=.12,to=f,delay=0}={}){
+  if(save.mute)return;try{ac=ac||new AudioContext();const t0=ac.currentTime+delay,o=ac.createOscillator(),v=ac.createGain();
+    o.type=type;o.frequency.setValueAtTime(f,t0);o.frequency.exponentialRampToValueAtTime(to,t0+dur);
+    v.gain.setValueAtTime(vol,t0);v.gain.exponentialRampToValueAtTime(.001,t0+dur);o.connect(v).connect(ac.destination);o.start(t0);o.stop(t0+dur);}catch(e){}
+}
+function noise(dur,vol=.25){
+  if(save.mute)return;try{ac=ac||new AudioContext();const n=ac.sampleRate*dur|0,buf=ac.createBuffer(1,n,ac.sampleRate),d=buf.getChannelData(0);
+    for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*(1-i/n)**2;const src=ac.createBufferSource(),f=ac.createBiquadFilter(),v=ac.createGain();
+    src.buffer=buf;f.type='lowpass';f.frequency.value=900;v.gain.value=vol;src.connect(f).connect(v).connect(ac.destination);src.start();}catch(e){}
+}
+const SFX={
+  place:()=>tone(520,.12,{to:780,vol:.08}),
+  take:()=>tone(600,.1,{to:380,vol:.06}),
+  nope:()=>tone(180,.12,{type:'square',vol:.04}),
+  launch:()=>{noise(.5,.12);tone(140,.5,{type:'sawtooth',to:420,vol:.04});},
+  comet:()=>[880,1320,1760].forEach((f,i)=>tone(f,.25,{type:'triangle',vol:.07,delay:i*.07})),
+  soft:()=>[523,659,784,1047].forEach((f,i)=>tone(f,.35,{type:'triangle',vol:.09,delay:i*.09})),
+  hard:()=>{noise(.25,.18);tone(392,.3,{type:'triangle',vol:.08,delay:.05});},
+  crash:()=>{noise(.7,.35);tone(120,.6,{type:'sawtooth',to:40,vol:.07});},
+  star:k=>tone(660*2**(k/4),.18,{type:'triangle',vol:.07}),
+};
+/* sparks: short-lived particles for comet pickups, landings and crashes */
+function burst(x,y,n,cols,speed=120,life=.9){if(reduce)n=Math.ceil(n/4);for(let i=0;i<n;i++){const a=Math.random()*6.283,v=speed*(.3+Math.random());
+  sparks.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:life*(.5+Math.random()*.5),age:0,col:cols[i%cols.length],r:1.5+Math.random()*2});}}
 const sky=(()=>{let s=4;const r=()=>{s=(s*16807)%2147483647;return s/2147483647;};return Array.from({length:140},()=>[r()*FW,r()*FH,r()*1.4+.3,r()*6.28]);})();
 
 function buildLevels(){
   const el=$('#levels');el.innerHTML='';
   LEVELS.forEach((L,i)=>{const b=document.createElement('button'),s=save.stars[i]||0;b.className='lv'+(i===li?' cur':'');
     b.innerHTML=`<b>${i+1}</b><small>${'★'.repeat(s)}${'·'.repeat(3-s)}</small>`;b.title=L.name;b.onclick=()=>load(i);el.appendChild(b);});
+  const got=LEVELS.reduce((a,_,i)=>a+(save.stars[i]||0),0);$('#total').textContent=`★ ${got}/${LEVELS.length*3}`;
 }
 function buildInv(){
   const el=$('#inv');el.innerHTML='';
@@ -176,14 +208,16 @@ function buildInv(){
 }
 function nextFree(){const i=used.findIndex((u,k)=>!u&&k>=0);return i;}
 function load(i){li=i;placed=[];used=LEVELS[i].inv.map(()=>false);sel=0;$('#lvname').textContent=LEVELS[i].name;reset();buildLevels();buildInv();}
-function reset(){world=makeWorld(LEVELS[li],[]);for(const p of placed)p.body=addPlanet(world,p.x,p.y,p.r,0),p.body.slot=p.slot;trail=[];done=false;acc=0;dirty=true;drag=null;$('#ov').hidden=true;$('#bLaunch').textContent='Launch';}
+function reset(){world=makeWorld(LEVELS[li],[]);for(const p of placed)p.body=addPlanet(world,p.x,p.y,p.r,0),p.body.slot=p.slot;trail=[];sparks=[];shake=0;hadComet=false;done=false;acc=0;dirty=true;drag=null;$('#ov').hidden=true;$('#bLaunch').textContent='Launch';}
 function clearAll(){placed=[];used=used.map(()=>false);sel=0;reset();buildInv();}
-function go(){if(world.state==='pad'){launch(world);$('#bLaunch').textContent='Reset';}else reset();}
+function go(){if(world.state==='pad'){launch(world);SFX.launch();$('#bLaunch').textContent='Reset';}else reset();}
+function setFast(on){fast=on;$('#bFast').classList.toggle('on',fast);}
+function setMute(on){save.mute=on;persist();$('#bMute').textContent=on?'Muted':'Sound';}
 
 /* placing: tap empty space drops the selected planet into orbit; tap one of yours to take it back */
 function pt(e){const r=cv.getBoundingClientRect();return [(e.clientX-r.left)/r.width*FW,(e.clientY-r.top)/r.height*FH];}
 const fits=(x,y,r,skip)=>!world.bodies.some(b=>b!==skip&&Math.hypot(b.px-x,b.py-y)<b.r+r+4)&&Math.hypot(world.rocket.x-x,world.rocket.y-y)>=r+8&&x>0&&x<FW&&y>0&&y<FH;
-function takeBack(b){world.bodies.splice(world.bodies.indexOf(b),1);used[b.slot]=false;placed=placed.filter(p=>p.body!==b);sel=b.slot;if(touched===b)touched=null;dirty=true;buildInv();}
+function takeBack(b){SFX.take();world.bodies.splice(world.bodies.indexOf(b),1);used[b.slot]=false;placed=placed.filter(p=>p.body!==b);sel=b.slot;if(touched===b)touched=null;dirty=true;buildInv();}
 function moveTo(b,x,y){if(!fits(x,y,b.r,b))return false;movePlanet(world,b,x,y);const p=placed.find(p=>p.body===b);p.x=x;p.y=y;dirty=true;return true;}
 cv.addEventListener('pointerdown',e=>{
   if(done)return;
@@ -196,8 +230,8 @@ cv.addEventListener('pointerdown',e=>{
   }
   if(used[sel]){const f=nextFree();if(f<0)return;sel=f;}
   const r=LEVELS[li].inv[sel];
-  if(!fits(x,y,r)){flash(x,y);return;}
-  const b=addPlanet(world,x,y,r);b.slot=sel;used[sel]=true;touched=b;
+  if(!fits(x,y,r)){flash(x,y);SFX.nope();return;}
+  const b=addPlanet(world,x,y,r);b.slot=sel;used[sel]=true;touched=b;SFX.place();
   if(world.state==='pad')placed.push({x,y,r,slot:sel,body:b});else{placed.push({x:b.px,y:b.py,r,slot:sel,body:b,late:true});preview=null;}
   dirty=true;const f=nextFree();if(f>=0)sel=f;buildInv();
 });
@@ -209,15 +243,19 @@ addEventListener('keydown',e=>{if(e.metaKey||e.ctrlKey)return;if(e.repeat&&!e.ke
   const NUDGE={arrowleft:[-1,0],arrowright:[1,0],arrowup:[0,-1],arrowdown:[0,1]};
   if(NUDGE[k]&&touched&&world.state==='pad'){e.preventDefault();const m=e.shiftKey?5:1;moveTo(touched,touched.px+NUDGE[k][0]*m,touched.py+NUDGE[k][1]*m);return;}
   if(k===' '){e.preventDefault();if(!$('#ov').hidden)reset();else go();}
-  else if(k==='r')reset();else if(k==='c')clearAll();
+  else if(k==='r')reset();else if(k==='c')clearAll();else if(k==='f')setFast(!fast);else if(k==='m')setMute(!save.mute);
   else if(k>='1'&&k<='4'&&+k<=LEVELS[li].inv.length&&!used[+k-1]){sel=+k-1;buildInv();}});
-$('#bLaunch').onclick=go;$('#bClear').onclick=clearAll;
+$('#bLaunch').onclick=go;$('#bClear').onclick=clearAll;$('#bFast').onclick=()=>setFast(!fast);$('#bMute').onclick=()=>setMute(!save.mute);
 $('#ovRetry').onclick=reset;$('#ovNext').onclick=()=>load(Math.min(LEVELS.length-1,li+1));
 
 function finish(){
   done=true;const w=world,land=w.result==='soft'||w.result==='hard';
   const n=land?1+(w.result==='soft'?1:0)+(w.comet?1:0):0;
   if(n>(save.stars[li]||0)){save.stars[li]=n;persist();buildLevels();}
+  const R=w.rocket;
+  if(land){SFX[w.result]();burst(R.x,R.y,w.result==='soft'?40:24,w.result==='soft'?['#8fe3a0','#f2c94c','#ffffff']:['#f2c94c','#c9cbe0'],w.result==='soft'?140:90);for(let k=0;k<n;k++)setTimeout(()=>SFX.star(k),400+k*180);}
+  else if(w.result==='crash'){SFX.crash();burst(R.x,R.y,50,['#ffb347','#ff6b5a','#ffe08a','#8a8aa0'],170,1.1);shake=reduce?0:.35;}
+  else tone(300,.6,{to:150,vol:.06});
   const why={soft:'Safe landing!',hard:'Rough landing',crash:'Crashed',lost:'Lost in space'}[w.result];
   $('#ovTitle').textContent=why;
   $('#ovStars').innerHTML=[0,1,2].map(k=>`<span class="${land&&k<n?'on':''}" style="animation-delay:${.15+k*.18}s">★</span>`).join('');
@@ -267,9 +305,9 @@ function drawRocket(R,t,live){
 }
 function label(t,x,y,size=18,col='#e9ecf8'){g.font=`600 ${size}px Fredoka, system-ui, sans-serif`;g.textAlign='center';g.textBaseline='middle';g.lineWidth=4;g.strokeStyle='rgba(8,8,24,.8)';g.strokeText(t,x,y);g.fillStyle=col;g.fillText(t,x,y);}
 function render(now){
-  const t=now/1000,w=world;
-  g.setTransform(DPR,0,0,DPR,0,0);
-  g.fillStyle='#0b0b1e';g.fillRect(0,0,FW,FH);
+  const t=now/1000,w=world,sk=shake>0?shake*24:0;
+  g.setTransform(DPR,0,0,DPR,sk*(Math.random()-.5)*DPR,sk*(Math.random()-.5)*DPR);
+  g.fillStyle='#0b0b1e';g.fillRect(-20,-20,FW+40,FH+40);
   for(const [x,y,r,p] of sky){g.globalAlpha=reduce?.6:.35+.35*Math.sin(t*1.3+p);g.fillStyle='#dfe6ff';g.fillRect(x,y,r,r);}g.globalAlpha=1;
   warpGrid();
   for(const b of w.bodies)orbitPath(b);
@@ -284,20 +322,23 @@ function render(now){
   if(w.state==='pad'){const a=w.L.launch.ang*Math.PI/180,R=w.rocket;g.strokeStyle='rgba(255,255,255,.6)';g.setLineDash([5,5]);g.lineWidth=1.5;g.beginPath();g.moveTo(R.x,R.y);g.lineTo(R.x+Math.cos(a)*50,R.y+Math.sin(a)*50);g.stroke();g.setLineDash([]);}
   if(w.result!=='crash'&&w.result!=='lost'||!done)drawRocket(w.rocket,t,w.state==='fly');
   else{const R=w.rocket,k=Math.min(1,(t-(shown||t))*2);g.fillStyle=`rgba(255,160,80,${1-k})`;g.beginPath();g.arc(R.x,R.y,6+18*k,0,7);g.fill();}
+  for(const p of sparks){const k=1-p.age/p.life;g.globalAlpha=k;g.fillStyle=p.col;g.beginPath();g.arc(p.x,p.y,p.r*(.5+k*.5),0,7);g.fill();}g.globalAlpha=1;
   if(bad&&t-bad.t<.4){g.strokeStyle=`rgba(255,110,110,${1-(t-bad.t)/.4})`;g.lineWidth=2;g.beginPath();g.arc(bad.x,bad.y,14,0,7);g.moveTo(bad.x-8,bad.y-8);g.lineTo(bad.x+8,bad.y+8);g.stroke();}
   if(w.state==='pad'&&placed.length===0)label('Tap to drop a planet. Drag it to fine-tune, then Launch.',FW/2,26,17);
-  if(w.state==='fly')label(`${w.ft.toFixed(1)} s`,FW-40,22,15,'#9aa3c7');
+  if(w.state==='fly')label(`${w.ft.toFixed(1)} s`+(fast?'  ×3':''),FW-50,22,15,fast?'#f2c94c':'#9aa3c7');
 }
 let last=performance.now();
 function frame(now){
   const dt=Math.min(.05,(now-last)/1000);last=now;
-  if(world.state==='fly'){acc+=dt;while(acc>=DT&&world.state==='fly'){step(world,DT);acc-=DT;}
+  if(world.state==='fly'){acc+=dt*(fast?3:1);while(acc>=DT&&world.state==='fly'){step(world,DT);acc-=DT;}
     const R=world.rocket,lt=trail[trail.length-1];if(!lt||Math.hypot(lt[0]-R.x,lt[1]-R.y)>4){trail.push([R.x,R.y]);if(trail.length>160)trail.shift();}}
+  if(world.comet&&!hadComet){hadComet=true;SFX.comet();burst(...world.L.comet,26,['#7fd8ff','#ffffff','#b9f0ff'],110,.8);}
+  for(const p of sparks){p.age+=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=1-2*dt;p.vy*=1-2*dt;}sparks=sparks.filter(p=>p.age<p.life);shake=Math.max(0,shake-dt);
   if(world.state==='pad'&&dirty){preview=predict(world,LEVELS[li].preview);dirty=false;}
   if(world.state==='done'&&!done){shown=now/1000;finish();}
   render(now);requestAnimationFrame(frame);
 }
-load(0);requestAnimationFrame(frame);
+setMute(save.mute);load(0);requestAnimationFrame(frame);
 </script>
 </body>
 </html>
