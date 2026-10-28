@@ -58,7 +58,10 @@ canvas{display:block;width:100%;aspect-ratio:8/5;max-width:100%;touch-action:non
 .res .group{justify-content:center}
 @keyframes pop{0%{transform:scale(0) rotate(-40deg)}100%{transform:scale(1)}}
 @media (prefers-reduced-motion:reduce){.stars span.on{animation:none}}
-@media (max-width:560px){h1{font-size:24px}button{font-size:14px;padding:8px 11px}}
+@media (max-width:560px){h1{font-size:24px}button{font-size:14px;padding:8px 11px}
+  /* the star chart is only ~220px tall on a phone: shrink the result card so its buttons stay on screen */
+  .overlay{padding:6px}.res{padding:8px 14px;gap:5px;border-radius:12px}.res h2{font-size:19px}
+  .stars span{font-size:26px}.goals{font-size:12px;gap:1px}}
 </style>
 </head>
 <body>
@@ -85,11 +88,24 @@ canvas{display:block;width:100%;aspect-ratio:8/5;max-width:100%;touch-action:non
 </div>
 
 <script id="sim">
-/* ---------- physics (pixels, seconds) ----------
-   Every body orbits the level's star on a circle, angular speed w = dir*K/R^1.5 (Kepler's third law shape).
-   A moon can orbit another body instead. Planets you place join the same orbits from where you drop them.
-   The rocket is the only thing that feels gravity: a = sum mu*d/|d|^3 over every massive body. */
-const FW=800,FH=500,DT=1/240,LIMIT=30,DENSITY=1600,ROCKET_R=4;
+/* ========== 1. SETTINGS: physics (pixels, seconds) ==========
+   Every number that shapes the flight lives here. The game script below has its own settings for looks and controls. */
+const FIELD_W=800,FIELD_H=500;   // play field size in pixels
+const DT=1/240;                  // simulation time step; the preview uses the same step so it matches the real flight
+const LIMIT=30;                  // a flight gives up after this many seconds
+const DENSITY=1600;              // a placed planet's mass = DENSITY * radius^2
+const ROCKET_R=4;                // rocket hit radius
+const SOFTENING=25;              // added to distance^2 in the gravity sum so close passes stay finite
+const LAUNCH_GRACE=.4;           // seconds the rocket cannot hit its own start planet
+const COMET_PICKUP=16;           // the comet is collected within this distance
+const OUT_MARGIN=80;             // the rocket is lost this far outside the field
+const PREVIEW_MAX_STEPS=40000;   // safety cap on preview simulation steps
+
+/* ========== 2. LEVELS ==========
+   Each level: name, inv (radii of the planets in the tray), preview (seconds of path shown before launch),
+   launch (angle in degrees, speed), soft (fastest touchdown that still counts as soft), comet (x,y of the bonus),
+   star (centre, size, mass mu, orbit speed K, dir +1 clockwise / -1 counter), bodies (start, dest, rocks, lava, moons).
+   ring(R,n,gapFrom,gapLen) builds a ring of n rocks at radius R with a gap. */
 const deg=a=>a*Math.PI/180;
 function ring(R,n,gapFrom,gapLen,r=11){const out=[];for(let i=0;i<n;i++){if(i>=gapFrom&&i<gapFrom+gapLen)continue;const a=2*Math.PI*i/n;out.push({type:'rock',polar:[R,a],r,mu:0});}return out;}
 const LEVELS=[
@@ -109,6 +125,10 @@ const LEVELS=[
   {"name":"Against the flow","preview":5,"inv":[36,24,14],"launch":{"ang":-15.902,"v":206.379},"soft":150,"comet":[549.419,224.638],"star":{"x":400,"y":250,"r":22,"mu":1124495.931,"K":1003.111,"dir":-1},"bodies":[{"type":"start","polar":[289.023,2.648],"r":20,"mu":0},{"type":"dest","polar":[152.6,0.654],"r":18,"mu":18000},{"type":"lava","polar":[224.356,2.403],"r":28,"mu":1254400},{"type":"rock","polar":[110,0],"r":10,"mu":0},{"type":"rock","polar":[110,0.314],"r":10,"mu":0},{"type":"rock","polar":[110,0.628],"r":10,"mu":0},{"type":"rock","polar":[110,0.942],"r":10,"mu":0},{"type":"rock","polar":[110,1.257],"r":10,"mu":0},{"type":"rock","polar":[110,1.571],"r":10,"mu":0},{"type":"rock","polar":[110,1.885],"r":10,"mu":0},{"type":"rock","polar":[110,2.199],"r":10,"mu":0},{"type":"rock","polar":[110,3.77],"r":10,"mu":0},{"type":"rock","polar":[110,4.084],"r":10,"mu":0},{"type":"rock","polar":[110,4.398],"r":10,"mu":0},{"type":"rock","polar":[110,4.712],"r":10,"mu":0},{"type":"rock","polar":[110,5.027],"r":10,"mu":0},{"type":"rock","polar":[110,5.341],"r":10,"mu":0},{"type":"rock","polar":[110,5.655],"r":10,"mu":0},{"type":"rock","polar":[110,5.969],"r":10,"mu":0}]},
   {"name":"Grand tour","preview":4,"inv":[38,26,16,10],"launch":{"ang":-9.151,"v":202.002},"soft":150,"comet":[401.22,365.672],"star":{"x":400,"y":250,"r":16,"mu":3902070.976,"K":1521.38,"dir":1,"hole":true},"bodies":[{"type":"start","xy":[82.821,337.717],"r":20,"mu":0},{"type":"rock","polar":[243.106,0.459],"r":30,"mu":1491400,"id":"giant"},{"type":"dest","moonOf":"giant","R":76.921,"ph":3.917,"w":-0.942,"r":14,"mu":12000},{"type":"lava","polar":[147.7,5.616],"r":26,"mu":1081600},{"type":"rock","polar":[95,0],"r":10,"mu":0},{"type":"rock","polar":[95,0.349],"r":10,"mu":0},{"type":"rock","polar":[95,2.094],"r":10,"mu":0},{"type":"rock","polar":[95,2.443],"r":10,"mu":0},{"type":"rock","polar":[95,2.793],"r":10,"mu":0},{"type":"rock","polar":[95,3.142],"r":10,"mu":0},{"type":"rock","polar":[95,3.491],"r":10,"mu":0},{"type":"rock","polar":[95,3.84],"r":10,"mu":0},{"type":"rock","polar":[95,4.189],"r":10,"mu":0},{"type":"rock","polar":[95,4.538],"r":10,"mu":0},{"type":"rock","polar":[95,4.887],"r":10,"mu":0},{"type":"rock","polar":[95,5.236],"r":10,"mu":0},{"type":"rock","polar":[95,5.585],"r":10,"mu":0},{"type":"rock","polar":[95,5.934],"r":10,"mu":0}]}
 ];
+/* ========== 3. PHYSICS ==========
+   Every body orbits the level's star on a circle, angular speed w = dir*K/R^1.5 (Kepler's third law shape).
+   A moon can orbit another body instead. Planets you place join the same orbits from where you drop them.
+   The rocket is the only thing that feels gravity: a = sum mu*d/|d|^3 over every massive body. */
 function makeWorld(L,placed){
   const S=L.star,bodies=[];
   const orbitAbout=(b,x,y)=>{const R=Math.hypot(x-S.x,y-S.y)||1;Object.assign(b,{cx:S.x,cy:S.y,R,ph:Math.atan2(y-S.y,x-S.x),w:S.dir*S.K/Math.pow(R,1.5)});};
@@ -134,39 +154,53 @@ function movePlanet(w,b,x,y){w.orbitAbout(b,x,y);b.ph-=b.w*w.t;[b.px,b.py]=pos(b
 function cloneWorld(w){const map=new Map(),bodies=w.bodies.map(b=>{const c=Object.assign({},b);map.set(b,c);return c;});for(const c of bodies)if(c.parent)c.parent=map.get(c.parent);
   return Object.assign({},w,{bodies,rocket:Object.assign({},w.rocket)});}
 function predict(w,secs){const c=cloneWorld(w);if(c.state==='pad'){c.state='fly';c.ft=0;}const pts=[[c.rocket.x,c.rocket.y]];let n=0;
-  while(c.state==='fly'&&c.ft<secs&&n++<40000){step(c,DT);const l=pts[pts.length-1];if(Math.hypot(l[0]-c.rocket.x,l[1]-c.rocket.y)>5)pts.push([c.rocket.x,c.rocket.y]);}
-  pts.push([c.rocket.x,c.rocket.y]);return {pts,result:c.state==='done'?c.result:null};}
-function accel(w,x,y){let ax=0,ay=0;for(const b of w.bodies){if(!b.mu)continue;const dx=b.px-x,dy=b.py-y,d2=dx*dx+dy*dy+25,d=Math.sqrt(d2);ax+=b.mu*dx/(d2*d);ay+=b.mu*dy/(d2*d);}return [ax,ay];}
+  while(c.state==='fly'&&c.ft<secs&&n++<PREVIEW_MAX_STEPS){step(c,DT);const l=pts[pts.length-1];if(Math.hypot(l[0]-c.rocket.x,l[1]-c.rocket.y)>5)pts.push([c.rocket.x,c.rocket.y]);}
+  pts.push([c.rocket.x,c.rocket.y]);const hit=c.hit?{x:c.hit.px,y:c.hit.py,r:c.hit.r}:null; // where the body that ends the flight will be by then
+  return {pts,result:c.state==='done'?c.result:null,comet:c.comet,hit};}
+function accel(w,x,y){let ax=0,ay=0;for(const b of w.bodies){if(!b.mu)continue;const dx=b.px-x,dy=b.py-y,d2=dx*dx+dy*dy+SOFTENING,d=Math.sqrt(d2);ax+=b.mu*dx/(d2*d);ay+=b.mu*dy/(d2*d);}return [ax,ay];}
 function step(w,dt){
   if(w.state!=='fly')return;
   w.t+=dt;w.ft+=dt;place(w,w.t);
   const R=w.rocket,[ax,ay]=accel(w,R.x,R.y);R.vx+=ax*dt;R.vy+=ay*dt;R.x+=R.vx*dt;R.y+=R.vy*dt;
   for(const b of w.bodies){
-    if(b.type==='start'&&w.ft<.4)continue;
+    if(b.type==='start'&&w.ft<LAUNCH_GRACE)continue;
     const dx=R.x-b.px,dy=R.y-b.py;if(dx*dx+dy*dy>(b.r+ROCKET_R)**2)continue;
     w.state='done';w.hit=b;
     if(b.type==='dest'){const [bvx,bvy]=vel(b,w.t);w.impact=Math.hypot(R.vx-bvx,R.vy-bvy);w.result=w.impact<=w.L.soft?'soft':'hard';}
     else w.result='crash';
     return;
   }
-  const c=w.L.comet;if(!w.comet&&Math.hypot(R.x-c[0],R.y-c[1])<16)w.comet=true;
-  if(R.x<-80||R.x>FW+80||R.y<-80||R.y>FH+80||w.ft>LIMIT){w.state='done';w.result='lost';}
+  const c=w.L.comet;if(!w.comet&&Math.hypot(R.x-c[0],R.y-c[1])<COMET_PICKUP)w.comet=true;
+  if(R.x<-OUT_MARGIN||R.x>FIELD_W+OUT_MARGIN||R.y<-OUT_MARGIN||R.y>FIELD_H+OUT_MARGIN||w.ft>LIMIT){w.state='done';w.result='lost';}
 }
 function launch(w){if(w.state==='pad'){w.state='fly';w.ft=0;}}
-if(typeof module!=='undefined')module.exports={LEVELS,makeWorld,step,addPlanet,launch,movePlanet,predict,DT,FW,FH};
+if(typeof module!=='undefined')module.exports={LEVELS,makeWorld,step,addPlanet,launch,movePlanet,predict,DT,FIELD_W,FIELD_H};
 </script>
 
 <script>
-/* ---------- game ---------- */
+/* ========== 4. SETTINGS: looks and controls ========== */
+const PLACED_COL=['#b18cff','#5fd4c4','#ff9fd0','#9fd0ff']; // colour of tray planet 1..4
+const FAST_FORWARD=3;          // speed of the fast-forward button (F)
+const TRAIL_SPACING=4;         // pixels between recorded rocket path points
+const TRAIL_POINTS=160;        // length of the glowing trail behind the flying rocket
+const GHOST_ALPHA=.45;          // brightness of the last flight's path, shown while you set up the next try
+const NUDGE_PIXELS=1,NUDGE_PIXELS_SHIFT=5; // arrow-key nudge of the selected planet (Shift = big step)
+const CRASH_SHAKE_SECONDS=.35; // screen shake after a crash
+const RESULT_COL={soft:'#8fe3a0',hard:'#f2c94c',crash:'#ff7d6e',lost:'#ff7d6e'}; // end-of-path mark: green soft, yellow rough, red fail
+const SAVE_KEY='gravity-save'; // localStorage key: {stars:{level:count}, mute, last}
+
+/* ========== 5. GAME STATE AND SAVE ========== */
 const $=s=>document.querySelector(s);
 const cv=$('#space'),g=cv.getContext('2d'),DPR=Math.min(2,window.devicePixelRatio||1);
-cv.width=FW*DPR;cv.height=FH*DPR;
+cv.width=FIELD_W*DPR;cv.height=FIELD_H*DPR;
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
-const PLACED_COL=['#b18cff','#5fd4c4','#ff9fd0','#9fd0ff'];
 let li=0,world,placed=[],used=[],sel=0,acc=0,trail=[],done=false,shown=null,drag=null,touched=null,preview=null,dirty=true,fast=false,sparks=[],shake=0,hadComet=false;
-let save={stars:{},mute:false};try{save=Object.assign(save,JSON.parse(localStorage.getItem('gravity-save')||'{}'));}catch(e){}
-function persist(){try{localStorage.setItem('gravity-save',JSON.stringify(save));}catch(e){}}
-/* sound: tiny synth, no audio files */
+let flightPath=[],ghost=null; // full path of the flight in progress, and of the last finished flight
+let save={stars:{},mute:false,last:0};try{save=Object.assign(save,JSON.parse(localStorage.getItem(SAVE_KEY)||'{}'));}catch(e){}
+function persist(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(save));}catch(e){}}
+
+/* ========== 6. SOUND AND SPARKS ==========
+   Sound: tiny WebAudio synth, no audio files; everything is silent while save.mute is on. */
 let ac=null;
 function tone(f,dur,{type='sine',vol=.12,to=f,delay=0}={}){
   if(save.mute)return;try{ac=ac||new AudioContext();const t0=ac.currentTime+delay,o=ac.createOscillator(),v=ac.createGain();
@@ -192,7 +226,8 @@ const SFX={
 /* sparks: short-lived particles for comet pickups, landings and crashes */
 function burst(x,y,n,cols,speed=120,life=.9){if(reduce)n=Math.ceil(n/4);for(let i=0;i<n;i++){const a=Math.random()*6.283,v=speed*(.3+Math.random());
   sparks.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:life*(.5+Math.random()*.5),age:0,col:cols[i%cols.length],r:1.5+Math.random()*2});}}
-const sky=(()=>{let s=4;const r=()=>{s=(s*16807)%2147483647;return s/2147483647;};return Array.from({length:140},()=>[r()*FW,r()*FH,r()*1.4+.3,r()*6.28]);})();
+/* ========== 7. LEVEL, TRAY AND BUTTONS ========== */
+const sky=(()=>{let s=4;const r=()=>{s=(s*16807)%2147483647;return s/2147483647;};return Array.from({length:140},()=>[r()*FIELD_W,r()*FIELD_H,r()*1.4+.3,r()*6.28]);})();
 
 function buildLevels(){
   const el=$('#levels');el.innerHTML='';
@@ -206,17 +241,19 @@ function buildInv(){
     const d=Math.round(10+r*.55);b.innerHTML=`<i style="width:${d}px;height:${d}px;background:${PLACED_COL[i%4]}"></i><span>${i+1}</span>`;b.title=`Planet ${i+1}, radius ${r}`;
     b.onclick=()=>{sel=i;buildInv();};el.appendChild(b);});
 }
-function nextFree(){const i=used.findIndex((u,k)=>!u&&k>=0);return i;}
-function load(i){li=i;placed=[];used=LEVELS[i].inv.map(()=>false);sel=0;$('#lvname').textContent=LEVELS[i].name;reset();buildLevels();buildInv();}
-function reset(){world=makeWorld(LEVELS[li],[]);for(const p of placed)p.body=addPlanet(world,p.x,p.y,p.r,0),p.body.slot=p.slot;trail=[];sparks=[];shake=0;hadComet=false;done=false;acc=0;dirty=true;drag=null;$('#ov').hidden=true;$('#bLaunch').textContent='Launch';}
+/* first tray slot still free, or -1 */
+const nextFree=()=>used.findIndex(u=>!u);
+function load(i){li=i;save.last=i;persist();ghost=null;placed=[];used=LEVELS[i].inv.map(()=>false);sel=0;$('#lvname').textContent=LEVELS[i].name;reset();buildLevels();buildInv();}
+function reset(){world=makeWorld(LEVELS[li],[]);for(const p of placed)p.body=addPlanet(world,p.x,p.y,p.r,0),p.body.slot=p.slot;trail=[];flightPath=[];sparks=[];shake=0;hadComet=false;done=false;acc=0;dirty=true;drag=null;$('#ov').hidden=true;$('#bLaunch').textContent='Launch';}
 function clearAll(){placed=[];used=used.map(()=>false);sel=0;reset();buildInv();}
 function go(){if(world.state==='pad'){launch(world);SFX.launch();$('#bLaunch').textContent='Reset';}else reset();}
 function setFast(on){fast=on;$('#bFast').classList.toggle('on',fast);}
 function setMute(on){save.mute=on;persist();$('#bMute').textContent=on?'Muted':'Sound';}
 
-/* placing: tap empty space drops the selected planet into orbit; tap one of yours to take it back */
-function pt(e){const r=cv.getBoundingClientRect();return [(e.clientX-r.left)/r.width*FW,(e.clientY-r.top)/r.height*FH];}
-const fits=(x,y,r,skip)=>!world.bodies.some(b=>b!==skip&&Math.hypot(b.px-x,b.py-y)<b.r+r+4)&&Math.hypot(world.rocket.x-x,world.rocket.y-y)>=r+8&&x>0&&x<FW&&y>0&&y<FH;
+/* ========== 8. INPUT ==========
+   Placing: tap empty space drops the selected planet into orbit; tap one of yours to take it back */
+function pt(e){const r=cv.getBoundingClientRect();return [(e.clientX-r.left)/r.width*FIELD_W,(e.clientY-r.top)/r.height*FIELD_H];}
+const fits=(x,y,r,skip)=>!world.bodies.some(b=>b!==skip&&Math.hypot(b.px-x,b.py-y)<b.r+r+4)&&Math.hypot(world.rocket.x-x,world.rocket.y-y)>=r+8&&x>0&&x<FIELD_W&&y>0&&y<FIELD_H;
 function takeBack(b){SFX.take();world.bodies.splice(world.bodies.indexOf(b),1);used[b.slot]=false;placed=placed.filter(p=>p.body!==b);sel=b.slot;if(touched===b)touched=null;dirty=true;buildInv();}
 function moveTo(b,x,y){if(!fits(x,y,b.r,b))return false;movePlanet(world,b,x,y);const p=placed.find(p=>p.body===b);p.x=x;p.y=y;dirty=true;return true;}
 cv.addEventListener('pointerdown',e=>{
@@ -241,20 +278,23 @@ cv.addEventListener('pointerup',endDrag);cv.addEventListener('pointercancel',end
 let bad=null;function flash(x,y){bad={x,y,t:performance.now()/1000};}
 addEventListener('keydown',e=>{if(e.metaKey||e.ctrlKey)return;if(e.repeat&&!e.key.startsWith('Arrow'))return;const k=e.key.toLowerCase();
   const NUDGE={arrowleft:[-1,0],arrowright:[1,0],arrowup:[0,-1],arrowdown:[0,1]};
-  if(NUDGE[k]&&touched&&world.state==='pad'){e.preventDefault();const m=e.shiftKey?5:1;moveTo(touched,touched.px+NUDGE[k][0]*m,touched.py+NUDGE[k][1]*m);return;}
+  if(NUDGE[k]&&touched&&world.state==='pad'){e.preventDefault();const m=e.shiftKey?NUDGE_PIXELS_SHIFT:NUDGE_PIXELS;moveTo(touched,touched.px+NUDGE[k][0]*m,touched.py+NUDGE[k][1]*m);return;}
   if(k===' '){e.preventDefault();if(!$('#ov').hidden)reset();else go();}
+  else if(k==='enter'&&!$('#ov').hidden){e.preventDefault();($('#ovNext').hidden?reset:nextLevel)();}
   else if(k==='r')reset();else if(k==='c')clearAll();else if(k==='f')setFast(!fast);else if(k==='m')setMute(!save.mute);
   else if(k>='1'&&k<='4'&&+k<=LEVELS[li].inv.length&&!used[+k-1]){sel=+k-1;buildInv();}});
 $('#bLaunch').onclick=go;$('#bClear').onclick=clearAll;$('#bFast').onclick=()=>setFast(!fast);$('#bMute').onclick=()=>setMute(!save.mute);
-$('#ovRetry').onclick=reset;$('#ovNext').onclick=()=>load(Math.min(LEVELS.length-1,li+1));
+const nextLevel=()=>load(Math.min(LEVELS.length-1,li+1));
+$('#ovRetry').onclick=reset;$('#ovNext').onclick=nextLevel;
 
+/* ========== 9. RESULT ========== */
 function finish(){
-  done=true;const w=world,land=w.result==='soft'||w.result==='hard';
+  done=true;ghost={pts:[...flightPath,[world.rocket.x,world.rocket.y]],result:world.result,hit:world.hit?{x:world.hit.px,y:world.hit.py,r:world.hit.r}:null};const w=world,land=w.result==='soft'||w.result==='hard';
   const n=land?1+(w.result==='soft'?1:0)+(w.comet?1:0):0;
   if(n>(save.stars[li]||0)){save.stars[li]=n;persist();buildLevels();}
   const R=w.rocket;
   if(land){SFX[w.result]();burst(R.x,R.y,w.result==='soft'?40:24,w.result==='soft'?['#8fe3a0','#f2c94c','#ffffff']:['#f2c94c','#c9cbe0'],w.result==='soft'?140:90);for(let k=0;k<n;k++)setTimeout(()=>SFX.star(k),400+k*180);}
-  else if(w.result==='crash'){SFX.crash();burst(R.x,R.y,50,['#ffb347','#ff6b5a','#ffe08a','#8a8aa0'],170,1.1);shake=reduce?0:.35;}
+  else if(w.result==='crash'){SFX.crash();burst(R.x,R.y,50,['#ffb347','#ff6b5a','#ffe08a','#8a8aa0'],170,1.1);shake=reduce?0:CRASH_SHAKE_SECONDS;}
   else tone(300,.6,{to:150,vol:.06});
   const why={soft:'Safe landing!',hard:'Rough landing',crash:'Crashed',lost:'Lost in space'}[w.result];
   $('#ovTitle').textContent=why;
@@ -264,14 +304,14 @@ function finish(){
   $('#ovNext').hidden=!land||li>=LEVELS.length-1;$('#ov').hidden=false;$('#bLaunch').textContent='Retry';
 }
 
-/* drawing */
+/* ========== 10. DRAWING ========== */
 const P=b=>[b.px,b.py];
 function warpGrid(){
   const st=32,masses=world.bodies.filter(b=>b.mu>0);
   const pt=(x,y)=>{let dx=0,dy=0;for(const b of masses){const ex=b.px-x,ey=b.py-y,d2=ex*ex+ey*ey,d=Math.sqrt(d2)+1e-3,m=Math.min(.75*d,b.mu*.00012*1/(1+d2/2500)*(b.type==='hole'?1.6:1));dx+=ex/d*m;dy+=ey/d*m;}return [x+dx,y+dy];};
   g.strokeStyle='rgba(120,170,255,.13)';g.lineWidth=1;
-  for(let y=0;y<=FH;y+=st){g.beginPath();for(let x=0;x<=FW;x+=8)g.lineTo(...pt(x,y));g.stroke();}
-  for(let x=0;x<=FW;x+=st){g.beginPath();for(let y=0;y<=FH;y+=8)g.lineTo(...pt(x,y));g.stroke();}
+  for(let y=0;y<=FIELD_H;y+=st){g.beginPath();for(let x=0;x<=FIELD_W;x+=8)g.lineTo(...pt(x,y));g.stroke();}
+  for(let x=0;x<=FIELD_W;x+=st){g.beginPath();for(let y=0;y<=FIELD_H;y+=8)g.lineTo(...pt(x,y));g.stroke();}
 }
 function orbitPath(b){
   if(!b.R||b.type==='star'||b.type==='hole')return;
@@ -303,19 +343,36 @@ function drawRocket(R,t,live){
   g.fillStyle='#f3f5fa';g.beginPath();g.moveTo(8,0);g.lineTo(-5,-4.5);g.lineTo(-3,0);g.lineTo(-5,4.5);g.closePath();g.fill();
   g.fillStyle='#ff6b5a';g.beginPath();g.arc(1.5,0,1.6,0,7);g.fill();g.restore();
 }
+/* where a path ends: a ring for a landing (green soft, yellow rough), a cross for a crash or a lost rocket.
+   The planets stand still while you set up, so the body that ends the flight is outlined where it WILL be by then. */
+function outcomeMark([x,y],result,hit,alpha=1){
+  g.globalAlpha=alpha;g.strokeStyle=RESULT_COL[result];
+  if(hit){g.lineWidth=1.5;g.setLineDash([3,4]);g.beginPath();g.arc(hit.x,hit.y,hit.r,0,7);g.stroke();g.setLineDash([]);}
+  g.lineWidth=2.5;g.beginPath();
+  if(result==='soft'||result==='hard')g.arc(x,y,9,0,7);else{g.moveTo(x-7,y-7);g.lineTo(x+7,y+7);g.moveTo(x+7,y-7);g.lineTo(x-7,y+7);}
+  g.stroke();g.globalAlpha=1;
+}
+/* the last flight, faint and dashed, so the next try can be compared with it */
+function drawGhost({pts,result,hit}){
+  if(pts.length<2)return;
+  g.strokeStyle=`rgba(255,200,140,${GHOST_ALPHA})`;g.lineWidth=1.5;g.setLineDash([2,5]);g.beginPath();g.moveTo(...pts[0]);
+  for(const p of pts)g.lineTo(...p);g.stroke();g.setLineDash([]);
+  outcomeMark(pts[pts.length-1],result,hit,.55);
+}
 function label(t,x,y,size=18,col='#e9ecf8'){g.font=`600 ${size}px Fredoka, system-ui, sans-serif`;g.textAlign='center';g.textBaseline='middle';g.lineWidth=4;g.strokeStyle='rgba(8,8,24,.8)';g.strokeText(t,x,y);g.fillStyle=col;g.fillText(t,x,y);}
 function render(now){
   const t=now/1000,w=world,sk=shake>0?shake*24:0;
   g.setTransform(DPR,0,0,DPR,sk*(Math.random()-.5)*DPR,sk*(Math.random()-.5)*DPR);
-  g.fillStyle='#0b0b1e';g.fillRect(-20,-20,FW+40,FH+40);
+  g.fillStyle='#0b0b1e';g.fillRect(-20,-20,FIELD_W+40,FIELD_H+40);
   for(const [x,y,r,p] of sky){g.globalAlpha=reduce?.6:.35+.35*Math.sin(t*1.3+p);g.fillStyle='#dfe6ff';g.fillRect(x,y,r,r);}g.globalAlpha=1;
   warpGrid();
   for(const b of w.bodies)orbitPath(b);
   const c=w.L.comet;if(!w.comet){const k=reduce?0:Math.sin(t*3)*.15;g.save();g.translate(...c);g.rotate(-.5);g.fillStyle='rgba(150,230,255,.25)';g.beginPath();g.ellipse(-14,0,16,4,0,0,7);g.fill();g.restore();ball(c[0],c[1],6*(1+k),'#ffffff','#7fd8ff','rgba(127,216,255,.5)');}
+  if(ghost&&w.state==='pad')drawGhost(ghost);
   if(preview&&preview.pts.length>1){const pts=preview.pts,live=w.state==='pad';g.lineWidth=2;
     for(let i=1;i<pts.length;i+=2){const a=live?.85*(1-.55*i/pts.length):.25;g.strokeStyle=`rgba(255,255,255,${a})`;g.beginPath();g.moveTo(...pts[i-1]);g.lineTo(...pts[i]);g.stroke();}
-    if(live&&preview.result){const e=pts[pts.length-1],ok=preview.result==='soft'||preview.result==='hard';g.strokeStyle=ok?'#8fe3a0':'#ff7d6e';g.lineWidth=2.5;g.beginPath();
-      if(ok)g.arc(e[0],e[1],9,0,7);else{g.moveTo(e[0]-7,e[1]-7);g.lineTo(e[0]+7,e[1]+7);g.moveTo(e[0]+7,e[1]-7);g.lineTo(e[0]-7,e[1]+7);}g.stroke();}}
+    if(live&&preview.result)outcomeMark(pts[pts.length-1],preview.result,preview.hit);
+    if(live&&preview.comet&&!w.comet){g.strokeStyle=RESULT_COL.soft;g.lineWidth=2;g.beginPath();g.arc(c[0],c[1],13,0,7);g.stroke();}}
   for(const b of w.bodies)drawBody(b,t);
   if(touched&&w.state==='pad'&&w.bodies.includes(touched)){g.strokeStyle='rgba(242,201,76,.8)';g.setLineDash([3,4]);g.lineWidth=1.5;g.beginPath();g.arc(touched.px,touched.py,touched.r+6,0,7);g.stroke();g.setLineDash([]);}
   if(trail.length>1){for(let i=1;i<trail.length;i++){g.strokeStyle=`rgba(255,200,140,${i/trail.length*.7})`;g.lineWidth=2;g.beginPath();g.moveTo(...trail[i-1]);g.lineTo(...trail[i]);g.stroke();}}
@@ -324,21 +381,22 @@ function render(now){
   else{const R=w.rocket,k=Math.min(1,(t-(shown||t))*2);g.fillStyle=`rgba(255,160,80,${1-k})`;g.beginPath();g.arc(R.x,R.y,6+18*k,0,7);g.fill();}
   for(const p of sparks){const k=1-p.age/p.life;g.globalAlpha=k;g.fillStyle=p.col;g.beginPath();g.arc(p.x,p.y,p.r*(.5+k*.5),0,7);g.fill();}g.globalAlpha=1;
   if(bad&&t-bad.t<.4){g.strokeStyle=`rgba(255,110,110,${1-(t-bad.t)/.4})`;g.lineWidth=2;g.beginPath();g.arc(bad.x,bad.y,14,0,7);g.moveTo(bad.x-8,bad.y-8);g.lineTo(bad.x+8,bad.y+8);g.stroke();}
-  if(w.state==='pad'&&placed.length===0)label('Tap to drop a planet. Drag it to fine-tune, then Launch.',FW/2,26,17);
-  if(w.state==='fly')label(`${w.ft.toFixed(1)} s`+(fast?'  ×3':''),FW-50,22,15,fast?'#f2c94c':'#9aa3c7');
+  if(w.state==='pad'&&placed.length===0)label('Tap to drop a planet. Drag it to fine-tune, then Launch.',FIELD_W/2,26,17);
+  if(w.state==='fly')label(`${w.ft.toFixed(1)} s`+(fast?`  ×${FAST_FORWARD}`:''),FIELD_W-50,22,15,fast?'#f2c94c':'#9aa3c7');
 }
+/* ========== 11. MAIN LOOP AND START ========== */
 let last=performance.now();
 function frame(now){
   const dt=Math.min(.05,(now-last)/1000);last=now;
-  if(world.state==='fly'){acc+=dt*(fast?3:1);while(acc>=DT&&world.state==='fly'){step(world,DT);acc-=DT;}
-    const R=world.rocket,lt=trail[trail.length-1];if(!lt||Math.hypot(lt[0]-R.x,lt[1]-R.y)>4){trail.push([R.x,R.y]);if(trail.length>160)trail.shift();}}
+  if(world.state==='fly'){acc+=dt*(fast?FAST_FORWARD:1);while(acc>=DT&&world.state==='fly'){step(world,DT);acc-=DT;}
+    const R=world.rocket,lt=trail[trail.length-1];if(!lt||Math.hypot(lt[0]-R.x,lt[1]-R.y)>TRAIL_SPACING){trail.push([R.x,R.y]);flightPath.push([R.x,R.y]);if(trail.length>TRAIL_POINTS)trail.shift();}}
   if(world.comet&&!hadComet){hadComet=true;SFX.comet();burst(...world.L.comet,26,['#7fd8ff','#ffffff','#b9f0ff'],110,.8);}
   for(const p of sparks){p.age+=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=1-2*dt;p.vy*=1-2*dt;}sparks=sparks.filter(p=>p.age<p.life);shake=Math.max(0,shake-dt);
   if(world.state==='pad'&&dirty){preview=predict(world,LEVELS[li].preview);dirty=false;}
   if(world.state==='done'&&!done){shown=now/1000;finish();}
   render(now);requestAnimationFrame(frame);
 }
-setMute(save.mute);load(0);requestAnimationFrame(frame);
+setMute(save.mute);load(Math.min(LEVELS.length-1,save.last|0));requestAnimationFrame(frame);
 </script>
 </body>
 </html>
